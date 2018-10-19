@@ -5,34 +5,71 @@ using UnityEngine;
 
 public class rocket : MonoBehaviour {
 
+    [SerializeField] float rcsThrust = 100f;
+    [SerializeField] float mainThrust = 100f;
+
     Rigidbody rigidBody;
 
-	// Use this for initialization
-	void Start () {
+    public AudioSource audioSource { get; private set; }
+
+    private AudioClip audioRocket;
+
+    public bool freezeRotation;
+
+    // Use this for initialization
+    void Start () {
         rigidBody = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        ProcessInput();
-	}
+       
+        Rotate();
+        Thrust();
+    }
 
-    private void ProcessInput()
+    private void Rotate()
     {
-       if (Input.GetKey(KeyCode.Space))
-        {
-            print("Trust!");
-            rigidBody.AddRelativeForce(Vector3.down);
 
-        }
+        rigidBody.freezeRotation = true;
+
+        
+        float rotationThisFrame = rcsThrust * Time.deltaTime;
 
         if (Input.GetKey(KeyCode.D))
         {
+           
+
             print("Going right");
-        } else if (Input.GetKey(KeyCode.A))
+            transform.Rotate(-Vector3.forward * rotationThisFrame);
+        }
+        else if (Input.GetKey(KeyCode.A))
         {
             print("Going left");
+            transform.Rotate(Vector3.forward * rotationThisFrame);
         }
+        rigidBody.freezeRotation = false;
+    }
 
+    private void Thrust()
+    {
+
+        float giveMoreThrust = mainThrust * Time.deltaTime;
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+            print("Trust!");
+            rigidBody.AddRelativeForce(Vector3.down * giveMoreThrust);
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            }
+
+        }
+        else
+        {
+            audioSource.Stop();
+        }
     }
 }
